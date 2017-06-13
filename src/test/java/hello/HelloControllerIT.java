@@ -21,17 +21,17 @@ public class HelloControllerIT {
 
 	@LocalServerPort
 	private int port;
-	
+
 	private URL base;
-	
+
 	@Autowired
 	private TestRestTemplate template;
-	
+
 	@Before
 	public void setUp() throws Exception {
-		this.base = new URL("http://localhost:" + port + "/");
+		this.base = new URL("http://localhost:" + port + "/greeting");
 	}
-	
+
 	@Test
 	public void getHello() throws Exception {
 		ResponseEntity<String> response = template.getForEntity(base.toString(), String.class);

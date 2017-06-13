@@ -18,7 +18,8 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 		// .formLogin().loginPage("/login"): if a user needs to be authenticated
 		// redirect them to /login
 		http.authorizeRequests()
-				.antMatchers("/", "/index.html", "/home", "/greeting-form", "/hello", "/person-form", "/person-result")
+				.antMatchers("/", "/index.html", "/home", "/greeting", "/greeting-form", "/hello", "/person-form",
+						"/person-result")
 				.permitAll().anyRequest().authenticated().and().formLogin().loginPage("/login").permitAll()
 				.defaultSuccessUrl("/home", true).and().logout().permitAll();
 	}

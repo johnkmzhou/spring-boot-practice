@@ -11,6 +11,11 @@ public class HelloController {
 	private static final String template = "Hello, %s!";
 	private final AtomicLong counter = new AtomicLong();
 	
+	@RequestMapping("/greeting")
+	public String greeting() {
+		return "Greetings from Spring Boot!";
+	}
+	
 	@RequestMapping("/hello")
 	public Hello hello(@RequestParam(value = "name", required = false, defaultValue = "World") String name) {
 		return new Hello(counter.incrementAndGet(), String.format(template, name));
