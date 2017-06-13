@@ -7,14 +7,19 @@ import org.slf4j.LoggerFactory;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.web.client.RestTemplate;
 
-@SpringBootApplication
+import storage.StorageProperties;
+import storage.StorageService;
+
+@SpringBootApplication(scanBasePackages="hello, storage")
 @EnableScheduling
+@EnableConfigurationProperties(StorageProperties.class)
 public class Application {
 	private static final Logger log = LoggerFactory.getLogger(Application.class);
 
@@ -33,7 +38,7 @@ public class Application {
 			}
 		};
 	}
-	
+
 	@Bean
 	public RestTemplate restTemplate(RestTemplateBuilder builder) {
 		return builder.build();
@@ -44,6 +49,14 @@ public class Application {
 		return args -> {
 			Quote quote = restTemplate.getForObject("http://gturnquist-quoters.cfapps.io/api/random", Quote.class);
 			log.info(quote.toString());
+		};
+	}
+
+	@Bean
+	CommandLineRunner init(StorageService storageService) {
+		return args -> {
+			storageService.deleteAll();
+			storageService.init();
 		};
 	}
 }
