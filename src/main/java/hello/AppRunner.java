@@ -4,6 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
+import org.springframework.util.Assert;
 
 import java.util.concurrent.CompletableFuture;
 
@@ -12,9 +13,11 @@ public class AppRunner implements CommandLineRunner {
 	private static final Logger logger = LoggerFactory.getLogger(AppRunner.class);
 
 	private final GitHubLookupService gitHubLookupService;
+	private final BookingService bookingService;
 
-	public AppRunner(GitHubLookupService gitHubLookupService) {
+	public AppRunner(GitHubLookupService gitHubLookupService, BookingService bookingService) {
 		this.gitHubLookupService = gitHubLookupService;
+		this.bookingService = bookingService;
 	}
 
 	@Override
@@ -36,6 +39,37 @@ public class AppRunner implements CommandLineRunner {
 		logger.info("--> " + page2.get());
 		logger.info("--> " + page3.get());
 
+		// Starts the booking service
+		// names cannot be longer than five characters nor null
+		bookingService.book("Alice", "Bob", "Carol");
+		Assert.isTrue(bookingService.findAllBookings().size() == 3, "First booking should work with no problem.");
+		logger.info("Alice, Bob and Carol have been booked");
+		try {
+			bookingService.book("Chris", "Samuel");
+		} catch (RuntimeException e) {
+			logger.error("'Samuel' is too big for the DB", e);
+		}
+		Assert.isTrue(bookingService.findAllBookings().size() == 3, "'Samuel' should have triggered a rollback.");
+
+		logBooked();
+
+		try {
+			bookingService.book("Buddy", null);
+		} catch (RuntimeException e) {
+			logger.error("Null is not valid for the name", e);
+		}
+		Assert.isTrue(bookingService.findAllBookings().size() == 3, "'null' should have triggered a rollback");
+
+		logBooked();
+	}
+
+	private void logBooked() {
+		String message = "";
+		for (String person : bookingService.findAllBookings()) {
+			message += person + ", ";
+		}
+		message = message.substring(0, message.length() - 2) + " have been booked";
+		logger.info(message);
 	}
 
 }
